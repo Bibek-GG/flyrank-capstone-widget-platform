@@ -84,6 +84,16 @@ This document provides a transparent, honest engineering record of the implement
 - **Root Cause**: Scripts directly queried the pool and relied on `process.exit(0)`.
 - **Resolution**: Added connection diagnostics with actionable error messaging and wrapped execution in `finally { await db.close(); }`.
 
+### Bug 9: `.gitignore` Pattern Did Not Cover Arbitrary `.env.*` Profiles
+- **Symptom**: `.gitignore` only targeted `.env.local` and `.env.*.local`, leaving `.env.production` or `.env.staging` potentially tracked.
+- **Root Cause**: Incomplete glob pattern for environment variables.
+- **Resolution**: Updated `.gitignore` to ignore `.env` and `.env.*` while explicitly preserving `!.env.example`.
+
+### Bug 10: Empty PostgreSQL Database Required Manual Migration Before Server Startup
+- **Symptom**: When connecting to a fresh PostgreSQL instance, `server.js` would start without tables existing unless `npm run db:migrate` had already been run manually.
+- **Root Cause**: `initializeDatabase()` only probed connection validity without ensuring schema tables existed.
+- **Resolution**: Enhanced `src/db/index.js` to inspect `information_schema.tables` and automatically execute `applyMigrations(client)` if tables are missing. Added volume mount for initial schema into `/docker-entrypoint-initdb.d/` in `docker-compose.yml`.
+
 ---
 
 ## 4. Commands Used to Build and Verify
@@ -98,7 +108,7 @@ node tests/verify-pgmem.js
 npm.cmd test
 
 # 4. Run end-to-end cross-origin integration test (Port 4000 & 5500)
-node tests/verify-integration.js
+npm.cmd run test:integration
 ```
 
 ## 5. Verification Status & Remaining Limitations

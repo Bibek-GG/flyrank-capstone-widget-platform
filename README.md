@@ -132,10 +132,13 @@ cp .env.example .env
 # 4. Run automated test suite (hermetic, zero-cost, runs in ~1.2s)
 npm test
 
-# 5. Start the main API and dashboard server (Port 4000)
+# 5. Run end-to-end cross-origin integration test (Port 4000 & 5500)
+npm run test:integration
+
+# 6. Start the main API and dashboard server (Port 4000)
 npm start
 
-# 6. In a separate terminal, start the customer test website (Port 5500)
+# 7. In a separate terminal, start the customer test website (Port 5500)
 npm run test-site
 ```
 

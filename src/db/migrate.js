@@ -4,11 +4,26 @@ const db = require('./index');
 const logger = require('../utils/logger');
 const config = require('../config');
 
-async function runMigrations() {
+async function applyMigrations(target) {
   const migrationsDir = path.join(__dirname, 'migrations');
   const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
 
-  logger.info(`Starting database migrations (${files.length} file(s) found)...`);
+  logger.info(`Applying database migrations (${files.length} file(s) found)...`);
+
+  for (const file of files) {
+    const filePath = path.join(migrationsDir, file);
+    const sql = fs.readFileSync(filePath, 'utf8');
+
+    logger.info(`Applying migration: ${file}`);
+    await target.query(sql);
+    logger.info(`Migration applied successfully: ${file}`);
+  }
+
+  logger.info('All database migrations applied successfully.');
+}
+
+async function runMigrations() {
+  logger.info('Starting database migrations...');
 
   let client;
   try {
@@ -19,16 +34,7 @@ async function runMigrations() {
   }
 
   try {
-    for (const file of files) {
-      const filePath = path.join(migrationsDir, file);
-      const sql = fs.readFileSync(filePath, 'utf8');
-
-      logger.info(`Applying migration: ${file}`);
-      await client.query(sql);
-      logger.info(`Migration applied successfully: ${file}`);
-    }
-
-    logger.info('All database migrations applied successfully.');
+    await applyMigrations(client);
   } finally {
     if (client) client.release();
     await db.close();
@@ -48,5 +54,6 @@ if (require.main === module) {
 }
 
 module.exports = {
+  applyMigrations,
   runMigrations
 };

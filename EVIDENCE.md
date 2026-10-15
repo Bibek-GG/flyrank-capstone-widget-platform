@@ -217,7 +217,7 @@ This document provides verified evidence, test commands, observed outputs, and r
 ## 4. Separate-Origin & Live System Integration Verification
 To verify the full cross-origin user journey across distinct ports (API on Port 4000, Customer Site on Port 5500), `tests/verify-integration.js` was executed:
 ```powershell
-node tests/verify-integration.js
+npm run test:integration
 ```
 **Actual Observed Output**:
 ```text

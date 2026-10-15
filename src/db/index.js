@@ -33,7 +33,23 @@ async function initializeDatabase() {
   const currentPool = getPool();
   try {
     const client = await currentPool.connect();
-    client.release();
+    try {
+      // Check if schema tables exist in the connected PostgreSQL instance
+      const checkTable = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' AND table_name = 'users'
+        );
+      `);
+      if (!checkTable.rows[0].exists) {
+        logger.info('Database tables not detected. Automatically applying initial migrations...');
+        const { applyMigrations } = require('./migrate');
+        await applyMigrations(client);
+        logger.info('Initial migrations applied successfully.');
+      }
+    } finally {
+      client.release();
+    }
     logger.info('Connected to PostgreSQL database successfully.');
   } catch (err) {
     if (process.env.NODE_ENV !== 'production' || process.env.ALLOW_IN_MEMORY_FALLBACK === 'true') {
