@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlyRank Lead Capture Platform | Owner Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="logo-icon">⚡</div>
+      <span>FlyRank Platform</span>
+    </div>
+    <div class="nav-actions" id="nav-user-area" style="display: none;">
+      <div class="user-badge">
+        <span class="user-dot"></span>
+        <span id="nav-user-name">Alice Johnson</span>
+      </div>
+      <button class="btn btn-secondary" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Authentication View (Shown when not authenticated) -->
+  <div id="auth-view" class="auth-wrapper">
+    <div class="auth-header">
+      <h2 id="auth-title">Welcome to FlyRank</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Manage your embeddable widgets &amp; captured leads</p>
+    </div>
+
+    <!-- Quick Seed Demo Login Box -->
+    <div class="demo-login-box">
+      <p>💡 Quick Seed Demo Login (1-Click Authenticate):</p>
+      <div class="demo-buttons-row">
+        <button class="demo-btn" id="demo-login-alice">Alice (2 Widgets)</button>
+        <button class="demo-btn" id="demo-login-bob">Bob (1 Widget)</button>
+      </div>
+    </div>
+
+    <div id="auth-alert" style="display: none; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 16px; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);"></div>
+
+    <form id="auth-form">
+      <div class="form-control" id="name-group" style="display: none;">
+        <label class="form-label" for="auth-name">Full Name</label>
+        <input type="text" id="auth-name" class="form-input" placeholder="Sarah Connor">
+      </div>
+      <div class="form-control">
+        <label class="form-label" for="auth-email">Email Address</label>
+        <input type="email" id="auth-email" class="form-input" placeholder="alice@example.com" required>
+      </div>
+      <div class="form-control">
+        <label class="form-label" for="auth-password">Password</label>
+        <input type="password" id="auth-password" class="form-input" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" id="auth-submit-btn">Sign In</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="#" id="toggle-auth-mode" style="color: var(--accent-cyan); font-size: 0.85rem; text-decoration: none;">Don't have an account? Sign up</a>
+    </div>
+  </div>
+
+  <!-- Dashboard Main View (Shown when authenticated) -->
+  <div id="app-view" class="app-container" style="display: none;">
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="widgets">My Widgets</button>
+      <button class="tab-btn" data-tab="submissions">Submissions</button>
+      <button class="tab-btn" data-tab="geo">Geolocation</button>
+    </div>
+
+    <!-- 1. OVERVIEW TAB -->
+    <div id="tab-overview" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Leads Captured</div>
+          <div class="stat-value" id="stat-total-submissions">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Active Widgets</div>
+          <div class="stat-value" id="stat-active-widgets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Total Widgets</div>
+          <div class="stat-value" id="stat-total-widgets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Conversion Status</div>
+          <div class="stat-value" style="color: var(--accent-green);">Healthy</div>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3 class="card-title">Recent Submissions Trend (Last 7 Days)</h3>
+        </div>
+        <div id="trend-chart-container" style="height: 180px; display: flex; align-items: flex-end; gap: 16px; padding-top: 20px;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3 class="card-title">Top Performing Widgets</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Widget Name</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Submissions</th>
+              </tr>
+            </thead>
+            <tbody id="top-widgets-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. WIDGETS TAB -->
+    <div id="tab-widgets" class="tab-content" style="display: none;">
+      <div class="card-header">
+        <h2 class="card-title">Configured Embeddable Widgets</h2>
+        <button class="btn btn-primary" id="open-create-widget-modal">+ Create New Widget</button>
+      </div>
+      <div class="widgets-grid" id="widgets-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- 3. SUBMISSIONS TAB -->
+    <div id="tab-submissions" class="tab-content" style="display: none;">
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3 class="card-title">Captured Lead Submissions</h3>
+          <div style="display: flex; gap: 10px;">
+            <select id="filter-widget-select" class="form-select" style="width: 220px;">
+              <option value="">All Widgets</option>
+            </select>
+            <button class="btn btn-secondary" id="refresh-submissions-btn">Refresh</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Widget</th>
+                <th>Submitted Data</th>
+                <th>Location</th>
+                <th>Client IP</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="submissions-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+          <button class="btn btn-secondary" id="prev-page-btn" disabled>&larr; Previous</button>
+          <span id="pagination-info" style="font-size: 0.9rem; color: var(--text-muted);">Page 1</span>
+          <button class="btn btn-secondary" id="next-page-btn">Next &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. GEOLOCATION TAB -->
+    <div id="tab-geo" class="tab-content" style="display: none;">
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3 class="card-title">Visitor Geolocation Distribution</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Country</th>
+                <th>Country Code</th>
+                <th>Total Leads Captured</th>
+              </tr>
+            </thead>
+            <tbody id="geo-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Widget Modal -->
+  <div id="widget-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="card-header">
+        <h3 class="card-title" id="widget-modal-title">Create New Widget</h3>
+        <button class="btn btn-secondary" id="close-widget-modal">&times;</button>
+      </div>
+
+      <form id="widget-form">
+        <div class="form-control">
+          <label class="form-label" for="widget-name">Internal Widget Name</label>
+          <input type="text" id="widget-name" class="form-input" placeholder="e.g. Homepage Newsletter" required>
+        </div>
+        <div class="form-control">
+          <label class="form-label" for="widget-type">Widget Type</label>
+          <select id="widget-type" class="form-select">
+            <option value="signup">Newsletter / Signup Form</option>
+            <option value="contact">Contact Sales Form</option>
+            <option value="cta">Call-to-Action / Waitlist Form</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="form-label" for="widget-title">Public Heading / Title</label>
+          <input type="text" id="widget-title" class="form-input" placeholder="Join our developer community" required>
+        </div>
+        <div class="form-control">
+          <label class="form-label" for="widget-desc">Description (Optional)</label>
+          <textarea id="widget-desc" class="form-textarea" placeholder="Get weekly updates straight to your inbox"></textarea>
+        </div>
+        <div class="form-control">
+          <label class="form-label" for="widget-btn-text">Submit Button Text</label>
+          <input type="text" id="widget-btn-text" class="form-input" value="Submit">
+        </div>
+        <div class="form-control">
+          <label class="form-label" for="widget-theme">Theme</label>
+          <select id="widget-theme" class="form-select">
+            <option value="dark">Dark Theme</option>
+            <option value="light">Light Theme</option>
+          </select>
+        </div>
+
+        <div style="margin: 20px 0 10px 0; display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="font-size: 0.95rem;">Form Fields</h4>
+          <button type="button" class="btn btn-secondary" id="add-field-btn" style="font-size: 0.8rem;">+ Add Field</button>
+        </div>
+        <div id="fields-editor-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+          <!-- Dynamically added fields -->
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Save Widget</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Embed Snippet Modal -->
+  <div id="snippet-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="card-header">
+        <h3 class="card-title">Embed Code Snippet</h3>
+        <button class="btn btn-secondary" id="close-snippet-modal">&times;</button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+        Copy and paste this single script snippet into your HTML page where you want the widget to appear:
+      </p>
+      <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 0.85rem; color: var(--accent-cyan); word-break: break-all; margin-bottom: 16px;" id="modal-snippet-code"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-primary" id="copy-snippet-btn">Copy Snippet</button>
+        <button class="btn btn-secondary" id="test-snippet-btn">Test on Separate-Origin Site</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

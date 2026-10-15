@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flyrank_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-flyrank_widget_platform}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-flyrank_widget_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  app:
+    build: .
+    container_name: flyrank_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      BASE_URL: ${BASE_URL:-http://localhost:4000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/flyrank_widget_platform}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5500,http://127.0.0.1:5500,http://localhost:4000}
+      GEO_PROVIDER_A_URL: ${GEO_PROVIDER_A_URL:-http://ip-api.com/json}
+      GEO_PROVIDER_B_URL: ${GEO_PROVIDER_B_URL:-https://ipapi.co}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX_SUBMISSIONS: ${RATE_LIMIT_MAX_SUBMISSIONS:-30}
+      RATE_LIMIT_MAX_AUTH: ${RATE_LIMIT_MAX_AUTH:-15}
+      JOB_POLL_INTERVAL_MS: ${JOB_POLL_INTERVAL_MS:-2000}
+      JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-3}
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  test-site:
+    build: .
+    container_name: flyrank_test_site
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      TEST_SITE_PORT: 5500
+      BASE_URL: http://localhost:4000
+    command: ["node", "src/testSiteServer.js"]
+    ports:
+      - "5500:5500"
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cross-Origin Customer Test Website | FlyRank Capstone</title>
+  <link rel="stylesheet" href="test-site.css">
+</head>
+<body>
+  <div class="test-container">
+    <header class="test-header">
+      <span class="badge-origin">Cross-Origin Test Environment</span>
+      <h1>Customer External Website Demo</h1>
+      <p class="test-lead">
+        This standalone webpage simulates an external customer website running on a completely different origin from the FlyRank API platform.
+      </p>
+    </header>
+
+    <div class="explanation-card">
+      <h2>🌐 Cross-Origin Architecture Verification</h2>
+      <p>
+        The capstone requirements explicitly mandate verifying that the widget functions properly when hosted on a different origin than the API backend.
+      </p>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="label">Host Customer Site Origin</div>
+          <div class="val" id="current-host">http://localhost:5500</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Widget &amp; API Server Origin</div>
+          <div class="val" id="api-origin">http://localhost:4000</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <strong>Embed Snippet Rendered on This Page:</strong>
+        <div class="snippet-block" id="snippet-display">
+&lt;script src="http://localhost:4000/widget.v1.js" data-widget-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"&gt;&lt;/script&gt;
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label for="widget-selector" style="font-size: 0.9rem; color: var(--text-secondary);">Switch Demo Widget:</label>
+        <select id="widget-selector" style="background: #0f172a; color: white; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px;">
+          <option value="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa">Alice: Newsletter Signup Form (Default)</option>
+          <option value="bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb">Alice: Enterprise Contact Sales Form</option>
+          <option value="cccccccc-cccc-4ccc-8ccc-cccccccccccc">Bob: AI Feature Beta Waitlist Form</option>
+        </select>
+        <button id="reload-widget-btn" style="background: #6366f1; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+          Load Widget
+        </button>
+      </div>
+    </div>
+
+    <div class="embed-preview-wrapper">
+      <div class="preview-title">Live Cross-Origin Embedded Widget Container</div>
+      
+      <!-- Embedded Widget Mount Point -->
+      <div id="widget-mount-area">
+        <script id="embedded-widget-script" src="http://localhost:4000/widget.v1.js" data-widget-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"></script>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update origin display dynamically
+    document.getElementById('current-host').textContent = window.location.origin;
+
+    // Allow switching widget dynamically
+    document.getElementById('reload-widget-btn').addEventListener('click', function() {
+      const selectedId = document.getElementById('widget-selector').value;
+      const mountArea = document.getElementById('widget-mount-area');
+      const snippetDisplay = document.getElementById('snippet-display');
+      
+      const apiHost = window.location.port === '5500' ? 'http://localhost:4000' : window.location.origin;
+      snippetDisplay.textContent = '<script src="' + apiHost + '/widget.v1.js" data-widget-id="' + selectedId + '"><' + '/script>';
+
+      // Clear existing widget DOM
+      mountArea.innerHTML = '';
+      
+      // Create and inject new script tag
+      const newScript = document.createElement('script');
+      newScript.src = apiHost + '/widget.v1.js';
+      newScript.setAttribute('data-widget-id', selectedId);
+      mountArea.appendChild(newScript);
+    });
+  </script>
+</body>
+</html>

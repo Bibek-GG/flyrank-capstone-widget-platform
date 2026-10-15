@@ -1,0 +1,77 @@
+# FlyRank Internship Backend Track Capstone Manifest
+version: "1.0"
+project_name: "flyrank-capstone-widget-platform"
+title: "Embeddable Widget & Lead-Capture Platform"
+author: "FlyRank Backend Engineering Intern"
+
+commands:
+  run: "npm start"
+  dev: "npm run dev"
+  test: "npm test"
+  migrate: "npm run db:migrate"
+  seed: "npm run db:seed"
+  test_site: "npm run test-site"
+  docker_run: "docker compose up --build"
+
+environment:
+  base_url: "http://localhost:4000"
+  test_site_url: "http://localhost:5500"
+  dashboard_url: "http://localhost:4000/dashboard"
+
+demo_credentials:
+  tenant_a:
+    name: "Alice Johnson"
+    email: "alice@example.com"
+    password: "Password123!"
+    notes: "Owner of Newsletter Signup and Enterprise Contact widgets"
+  tenant_b:
+    name: "Bob Smith"
+    email: "bob@example.com"
+    password: "Password123!"
+    notes: "Owner of Beta Waitlist CTA widget"
+
+endpoints:
+  health:
+    method: "GET"
+    path: "/health"
+    description: "System health check and uptime probe"
+  auth_register:
+    method: "POST"
+    path: "/api/auth/register"
+    description: "Owner registration with password hashing and JWT issuance"
+  auth_login:
+    method: "POST"
+    path: "/api/auth/login"
+    description: "Owner login returning JWT token"
+  widgets_list:
+    method: "GET"
+    path: "/api/widgets"
+    description: "List owner's widgets (tenant-isolated)"
+  widget_create:
+    method: "POST"
+    path: "/api/widgets"
+    description: "Create a new embeddable form or CTA widget"
+  widget_embed:
+    method: "GET"
+    path: "/api/widgets/{id}/embed"
+    description: "Retrieve generated HTML script embed snippet"
+  public_config:
+    method: "GET"
+    path: "/api/public/widgets/{id}/config"
+    description: "Public widget configuration endpoint with short caching"
+  public_submit:
+    method: "POST"
+    path: "/api/public/widgets/{id}/submissions"
+    description: "Cross-origin public lead submission endpoint with validation and rate limiting"
+  dashboard_overview:
+    method: "GET"
+    path: "/api/dashboard/overview"
+    description: "High-level metrics, conversion trends, and top widgets"
+  dashboard_submissions:
+    method: "GET"
+    path: "/api/dashboard/submissions"
+    description: "Paginated submissions list filtered by owner and widget"
+  versioned_asset:
+    method: "GET"
+    path: "/widget.v1.js"
+    description: "Versioned embeddable JavaScript widget asset with immutable caching"
